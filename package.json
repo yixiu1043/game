@@ -1,0 +1,11 @@
+{
+  "name": "yixiu-game",
+  "version": "0.0.12",
+  "description": "yixiu-game",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "bash deploy.sh"
+  },
+  "author": "yixiu",
+  "license": "MIT"
+}

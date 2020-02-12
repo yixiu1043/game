@@ -1,5 +1,5 @@
 <!doctype html>
-<meta charset="utf-8">
+<meta charset='utf-8'>
 <title>Treasure hunter</title>
 <style>
   * {
@@ -17,11 +17,84 @@
     left: 50%;
     transform: translate(-50%, -50%) scale(1.5);
   }
+
+  .openScene {
+    width: 800px;
+    height: 600px;
+    color: #ffffff;
+    font-family: serif;
+    font-size: 35px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+  }
+
+  .slogan {
+    line-height: 60px;
+  }
+
+  .tip {
+    margin-top: 150px;
+    font-size: 25px;
+    color: yellow;
+    text-align: center;
+  }
+
+  .progressOuter {
+    width: 790px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: black;
+    position: absolute;
+    left: 5px;
+    bottom: 100px;
+    overflow: hidden;
+  }
+
+  .progressBar {
+    width: 5px;
+    height: 20px;
+    background-color: green;
+    position: relative;
+    transition: width 3s ease-in;
+  }
+
+  .progressBar img {
+    position: absolute;
+    right: -10px;
+    top: 0;
+    width: auto;
+    height: 20px;
+  }
+
+  .number {
+    margin-top: 60px;
+    text-align: center;
+    font-size: 20px;
+  }
 </style>
 
 <body>
-  <script src="pixi.min.js"></script>
+  <div class='openScene'>
+    <p class="slogan">在传奇的艾泽拉大陆埋藏着一个可以改变世界的宝藏，千百年来无数淘金者前往其中探索都一无所获，直到一位天才少年的出现...</p>
+    <p class="tip">Tip: 使用方向键移动角色，拿到宝箱走出大门，游戏胜利！</p>
+    <p class="number">游戏加载中...</p>
+    <div class="progressOuter">
+      <div class="progressBar">
+        <img src="images/explorer.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <script src='pixi.min.js'></script>
   <script>
+    const progressOuter = document.querySelector('.progressOuter');
+    const progressBar = document.querySelector('.progressBar');
+    const number = document.querySelector('.number');
+    const openScene = document.querySelector('.openScene');
 
     //Aliases
     let Application = PIXI.Application,
@@ -34,33 +107,37 @@
       Text = PIXI.Text,
       TextStyle = PIXI.TextStyle;
 
-    //Create a Pixi Application
-    let app = new Application({
+    const app = new Application({
       width: 512,
       height: 512,
       antialiasing: true,
       transparent: false,
       resolution: 1
     });
-    // app.renderer.view.style.position = "absolute";
-    // app.renderer.view.style.display = "block";
-    // app.renderer.autoResize = true;
-    // app.renderer.resize(window.innerWidth, window.innerHeight);
-
-    //Add the canvas that Pixi automatically created for you to the HTML document
+    app.renderer.view.style.display = 'none';
     document.body.appendChild(app.view);
 
     loader
-      .add(["images/treasureHunter.json", "images/animals.json"])
+      .add(['images/explorer.png', 'images/treasureHunter.json', 'images/animals.json'])
+      .on("progress", loadProgressHandler)
       .load(setup);
+
+    function loadProgressHandler(loader, resource) {
+      console.log("progress: " + loader.progress + "%");
+      progressBar.style.width = progressOuter.offsetWidth * (loader.progress / 100) + 'px';
+    }
 
     //Define variables that might be used in more 
     //than one function
     let state, explorer, treasure, blobs, chimes, exit, player, dungeon,
       door, healthBar, message, gameScene, gameOverScene, enemies, id,
-      hpText, cat, hedgehog, tiger;
+      hpText, cat, hedgehog, tiger, pregressScene;
 
     function setup() {
+      setTimeout(() => {
+        openScene.style.display = 'none';
+        app.renderer.view.style.display = 'block';
+      }, 3020);
 
       //Make the game scene and add it to the stage
       gameScene = new Container();
@@ -68,20 +145,20 @@
 
       //Make the sprites and add them to the `gameScene`
       //Create an alias for the texture atlas frame ids
-      id = resources["images/treasureHunter.json"].textures;
-      id2 = resources["images/animals.json"].textures;
+      id = resources['images/treasureHunter.json'].textures;
+      id2 = resources['images/animals.json'].textures;
 
       //Dungeon
-      dungeon = new Sprite(id["dungeon.png"]);
+      dungeon = new Sprite(id['dungeon.png']);
       gameScene.addChild(dungeon);
 
       //Door
-      door = new Sprite(id["door.png"]);
+      door = new Sprite(id['door.png']);
       door.position.set(32, 0);
       gameScene.addChild(door);
 
       //Explorer
-      explorer = new Sprite(id["explorer.png"]);
+      explorer = new Sprite(id['explorer.png']);
       explorer.x = 40;
       explorer.y = gameScene.height / 2 - explorer.height / 2;
       explorer.vx = 0;
@@ -89,17 +166,10 @@
       gameScene.addChild(explorer);
 
       //Treasure
-      treasure = new Sprite(id["treasure.png"]);
+      treasure = new Sprite(id['treasure.png']);
       treasure.x = gameScene.width - treasure.width - 48;
       treasure.y = gameScene.height / 2 - treasure.height / 2;
       gameScene.addChild(treasure);
-
-      // 添加小动物
-      // cat, hedgehog, tiger
-      // cat = new Sprite(id2["cat.png"]);
-      // cat.x = 100;
-      // cat.y = 20;
-      // gameScene.addChild(cat);
 
       //Make the blobs
       let numberOfBlobs = 10,
@@ -115,7 +185,7 @@
       for (let i = 0; i < numberOfBlobs; i++) {
 
         //Make a blob
-        let blob = new Sprite(id["blob.png"]);
+        let blob = new Sprite(id['blob.png']);
 
         //Space each blob horizontally according to the `spacing` value.
         //`xOffset` determines the point from the left of the screen
@@ -165,11 +235,11 @@
       healthBar.addChild(outerBar);
 
       let hpStyle = new TextStyle({
-        fontFamily: "Futura",
+        fontFamily: 'Futura',
         fontSize: 16,
-        fill: "red"
+        fill: 'red'
       });
-      hpText = new Text("❤", hpStyle);
+      hpText = new Text('❤', hpStyle);
       hpText.x = healthBar.width + 4;
       hpText.y = -7;
       healthBar.addChild(hpText);
@@ -184,11 +254,11 @@
 
       //Create the text sprite and add it to the `gameOver` scene
       let style = new TextStyle({
-        fontFamily: "Futura",
+        fontFamily: 'Futura',
         fontSize: 64,
-        fill: "white"
+        fill: 'white'
       });
-      message = new Text("The End!", style);
+      message = new Text('The End!', style);
       message.x = 120;
       message.y = app.stage.height / 2 - 32;
       gameOverScene.addChild(message);
@@ -198,10 +268,8 @@
         up = keyboard(38),
         right = keyboard(39),
         down = keyboard(40);
-
       //Left arrow key `press` meth·od`
       left.press = function () {
-
         //Change the e512©plorer's velocity when the key is pressed
         explorer.vx = -5;
         explorer.vy = 0;
@@ -260,7 +328,6 @@
 
 
     function gameLoop(delta) {
-
       //Update the current game state:
       state(delta);
     }
@@ -290,7 +357,7 @@
 
         //If the blob hits the top or bottom of the stage, reverse
         //its direction
-        if (blobHitsWall === "top" || blobHitsWall === "bottom") {
+        if (blobHitsWall === 'top' || blobHitsWall === 'bottom') {
           blob.vy *= -1;
         }
 
@@ -320,24 +387,22 @@
       if (hitTestRectangle(explorer, treasure)) {
 
         //If the treasure is touching the explorer, center it over the explorer
-        // treasure.x = explorer.x + 8;
-        // treasure.y = explorer.y + 8;
         treasure.x = explorer.x - 4;
         treasure.y = explorer.y + 20;
       }
 
       //Does the explorer have enough health? If the width of the `innerBar`
-      //is less than zero, end the game and display "You lost!"
+      //is less than zero, end the game and display 'You lost!'
       if (healthBar.outer.width < 0) {
         state = end;
-        message.text = "You lost!";
+        message.text = 'You lost!';
       }
 
       //If the explorer has brought the treasure to the exit,
-      //end the game and display "You won!"
+      //end the game and display 'You won!'
       if (hitTestRectangle(treasure, door)) {
         state = end;
-        message.text = "You won!";
+        message.text = 'You won!';
       }
     }
 
@@ -355,25 +420,25 @@
       //Left
       if (sprite.x < container.x) {
         sprite.x = container.x;
-        collision = "left";
+        collision = 'left';
       }
 
       //Top
       if (sprite.y < container.y) {
         sprite.y = container.y;
-        collision = "top";
+        collision = 'top';
       }
 
       //Right
       if (sprite.x + sprite.width > container.width) {
         sprite.x = container.width - sprite.width;
-        collision = "right";
+        collision = 'right';
       }
 
       //Bottom
       if (sprite.y + sprite.height > container.height) {
         sprite.y = container.height - sprite.height;
-        collision = "bottom";
+        collision = 'bottom';
       }
 
       //Return the `collision` value
@@ -468,10 +533,10 @@
 
       //Attach event listeners
       window.addEventListener(
-        "keydown", key.downHandler.bind(key), false
+        'keydown', key.downHandler.bind(key), false
       );
       window.addEventListener(
-        "keyup", key.upHandler.bind(key), false
+        'keyup', key.upHandler.bind(key), false
       );
       return key;
     }
