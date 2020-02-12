@@ -2,7 +2,7 @@
   "name": "yixiu-game",
   "version": "0.0.12",
   "description": "yixiu-game",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "deploy": "bash deploy.sh"
   },
